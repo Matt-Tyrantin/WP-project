@@ -9,6 +9,17 @@
 
 		protected static $columns = ['id', 'first_name', 'last_name'];
 
+		public static function GetAll($params = [])
+		{
+			$course_holders = parent::GetAll($params);
+
+			foreach ($course_holders as $course_holder) {
+				$course_holder->SetAttribute('courses', $course_holder->GetCourses());
+			}
+
+			return $course_holders;
+		}
+
 		/*
 		* Returns all courses which this course holder is holding
 		*/
@@ -29,6 +40,54 @@
 			$course->SetAttribute($foreign_key, $this->GetAttribute(static::$primary_key));
 
 			return $course->Save();
+		}
+
+		/**
+		 * Attaches an array of coruses to this course holder
+		 */
+		public function AttachCourses($courses)
+		{
+			$this->DetachAllCourses();
+
+			if (is_numeric($courses[0])) {
+				foreach ($courses as $course_id) {
+					$this->AttachCourse(Course::Get($course_id));
+				}
+
+			} else {
+				foreach ($courses as $course) {
+					$this->AttachCourse($course);
+				}
+			}
+
+			return true;
+		}
+
+		/**
+		 * Detaches a course from this course holder
+		 */
+		public function DetachCourse($course)
+		{
+			if ($course->GetAttribute('holder_id') == $this->GetAttribute(CourseHolder::$primary_key)) {
+				$course->SetAttribute('holder_id', null);
+				$course->Save();
+			}
+
+			return true;
+		}
+
+		/**
+		 * Detaches all courses currently attached to this course holder
+		 */
+		public function DetachAllCourses()
+		{
+			foreach ($this->GetCourses() as $course) {
+				if (!$this->DetachCourse($course)) {
+					return false;
+				}
+			}
+
+			return true;
 		}
 
 		/**

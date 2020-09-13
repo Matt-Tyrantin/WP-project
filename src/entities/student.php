@@ -3,6 +3,8 @@
 
 	require_once 'entity.php';
 	require_once 'course_student.php';
+	require_once 'activity_student.php';
+	require_once 'activity.php';
 
 	class Student extends Entity {
 		protected static $entity_name  = 'students';
@@ -14,13 +16,7 @@
 			$students = parent::GetAll($params);
 
 			foreach ($students as $student) {
-				$courses = array();
-
-				foreach ($student->GetCourses() as $course) {
-					$courses[] = $course;
-				}
-
-				$student->SetAttribute('courses', $courses);
+				$student->SetAttribute('courses', $student->GetCourses());
 			}
 
 			return $students;
@@ -73,8 +69,6 @@
 				'student_id' => $this->GetAttribute(static::$primary_key) 
 			];
 
-			print_r(CourseStudent::GetAll($params));	
-
 			if (count(CourseStudent::GetAll($params)) > 0) {
 				return true;
 			}
@@ -83,6 +77,15 @@
 				'course_id' => $course->GetAttribute(Course::$primary_key),
 				'student_id' => $this->GetAttribute(static::$primary_key) 
 			]);
+
+			foreach($course->GetActivities() as $activity) {
+				$activity_student = new ActivityStudent([
+					'student_id' => $this->GetAttribute(static::$primary_key),
+					'activity_id' => $activity->GetAttribute(Activity::$primary_key)
+				]);
+
+				$activity_student->Save();
+			}
 
 			return $course_student->Save();
 		}
@@ -98,6 +101,16 @@
 			];
 
 			$course_student = CourseStudent::GetAll($params);
+
+			foreach($course->GetActivities() as $activity) {
+				$activity_students = ActivityStudent::GetAll([
+					'student_id' => $this->GetAttribute(static::$primary_key)
+				]);
+
+				foreacH($activity_students as $activity_student) {
+					$activity_student->Delete();
+				}
+			}
 
 			if (count($course_student) == 0) {
 				return true;

@@ -40,7 +40,7 @@
             ]);
 
             if (!$student->Save()) {
-                throw new \Exception('Student could not be saved into database');
+                return false;
             }
 
             if (!array_key_exists('courses', $params)) {
@@ -64,7 +64,7 @@
             ]);
 
             if (!$student->Save()) {
-                throw new \Exception('Student could not be saved into database');
+                return false;
             }
 
             if (!array_key_exists('courses', $params)) {
@@ -72,7 +72,6 @@
             }
 
             $student->AttachCourses($params['courses']);
-
 
             return true;
         }

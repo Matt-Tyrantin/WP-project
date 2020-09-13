@@ -34,9 +34,22 @@
          */
         public function Post($params)
         {
-            $course_holder = new CourseHolder($params);
+            $course_holder = new CourseHolder([
+                'first_name' => $params['first_name'],
+                'last_name' => $params['last_name']
+            ]);
 
-            return $course_holder->Save();
+            if (!$course_holder->Save()) {
+                return false;
+            }
+
+            if (!array_key_exists('courses', $params)) {
+                $params['courses'] = array();
+            }
+
+            $course_holder->AttachCourses($params['courses']);
+
+            return true;
         }
 
         /**
@@ -44,7 +57,37 @@
          */
         public function Put($params)
         {
+            $course_holder = new CourseHolder([
+                'id' => $params['id'],
+                'first_name' => $params['first_name'],
+                'last_name' => $params['last_name']
+            ]);
 
+            if (!$course_holder->Save()) {
+                return false;
+            }
+
+            if (!array_key_exists('courses', $params)) {
+                $params['courses'] = array();
+            }
+
+            $course_holder->AttachCourses($params['courses']);
+
+            return true;
+        }
+
+        /**
+         * Removes a specified course holder
+         */
+        public function Delete($params)
+        {
+            $course_holder = CourseHolder::Get($params['id']);
+
+            if ($course_holder != null) {
+                return $course_holder->Delete();
+            } else {
+                return true;
+            }
         }
 	}
 ?>

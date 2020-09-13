@@ -85,7 +85,7 @@
 		*/
 		public static function GetFromPrimaryKey($key_value)
 		{
-			$object_array = static::GetAll([static::$primary_key => $key_value]);
+			$object_array = self::GetAll([static::$primary_key => $key_value]);
 
 			if (!empty($object_array[0])) {
 				return $object_array[0];
@@ -99,7 +99,7 @@
 		 */
 		public static function Get($key_value)
 		{
-			return static::GetFromPrimaryKey($key_value);
+			return self::GetFromPrimaryKey($key_value);
 		}
 
 		/*
@@ -188,7 +188,9 @@
 			foreach (static::$columns as $column) {
 				$value = $this->GetAttribute($column);
 				if ($value == null) continue;
-				if (is_numeric($value)) {
+				if ($value == 'null') {
+					$sql .= "NULL,";
+				} else if (is_numeric($value)) {
 					$sql .= $value.',';
 				} else {
 					$sql .= "'".$value."',";
@@ -218,7 +220,9 @@
 				$sql .= $column.'=';
 				$value = $this->GetAttribute($column);
 
-				if (is_numeric($value)) {
+				if($value == 'null' || $value == null) {
+					$sql .= "NULL,";
+				} else if (is_numeric($value)) {
 					$sql .= $value.',';
 				} else {
 					$sql .= "'".$value."',";
